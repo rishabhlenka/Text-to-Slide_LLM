@@ -1,3 +1,5 @@
+const MAX_TOKENS_PER_CALL = 1500;
+
 const splitTextIntoChunks = (text, slideCount) => {
   // Split text based on markdown headings or paragraphs
   let sections = text.split(/(?=\n#{1,6}\s)|\n\s*\n/);
@@ -22,4 +24,25 @@ const splitTextIntoChunks = (text, slideCount) => {
   return sections;
 };
 
-export { splitTextIntoChunks };
+const splitForBatchProcessing = (text) => {
+  const sections = text.split(/(?=\n#{1,6}\s)/);
+  const chunks = [];
+  let currentChunk = "";
+
+  for (const section of sections) {
+    if ((currentChunk + section).length > MAX_TOKENS_PER_CALL) {
+      chunks.push(currentChunk.trim());
+      currentChunk = section;
+    } else {
+      currentChunk += section + "\n\n";
+    }
+  }
+
+  if (currentChunk) {
+    chunks.push(currentChunk.trim());
+  }
+
+  return chunks;
+};
+
+export { splitTextIntoChunks, splitForBatchProcessing };
