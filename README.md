@@ -189,6 +189,8 @@ backend/
 
    'cd gamma'
 
+   'npm install'
+
 2. Backend Setup:
 
    'cd gamma-backend'
