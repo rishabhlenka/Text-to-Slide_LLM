@@ -132,7 +132,7 @@ Ensured all content is included without losing structure.
 
 - Supports multiple LLMs for flexibility.
 
-\*\* **Error Handling & Validation**
+## **Error Handling & Validation**
 
 - Ensures slide count limits.
 
@@ -180,7 +180,7 @@ Ensured all content is included without losing structure.
 
 # **Challenges Faced & Solutions**
 
-## _LLM Counting Limitations_
+## **LLM Counting Limitation**
 
 - Issue: LLMs were unreliable for exact character position splits.
 
@@ -217,7 +217,7 @@ Implement caching to reduce redundant LLM calls.
 
 - Add dynamic selection between available LLMs based on performance.
 
-# Conclusion
+# **Conclusion**
 
 - This project showcases an efficient markdown-to-slide converter leveraging LLM
   capabilities. The iterative development approach allowed for refining the
