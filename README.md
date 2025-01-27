@@ -1,33 +1,38 @@
 # Project Overview
 
-- The project consists of a React frontend and a Node.js backend that leverages
-  LLMs to split markdown documents.
+- This project consists of a React frontend and a Node.js backend that work
+  together to convert a markdown document into structured slide sections using
+  Large Language Models (LLMs).
 
-- Users provide markdown content and specify the number of slides.
+- The user provides markdown content along with the desired number of slides.
+  The backend then processes the document using an LLM and returns sections of
+  text that can be directly used as slides.
 
-- The backend processes the content and returns structured slide sections.
+- The primary goal is to ensure each section represents a discrete idea,
+  preserving the integrity of the original markdown structure while making it
+  presentation-ready.
 
-# Tech Stack
+# **Tech Stack**
 
 ## Frontend:
 
-- React (TypeScript)
+- React (TypeScript): Used for building the user interface.
 
-- Tailwind CSS
+- Tailwind CSS: Provides a clean and modern design with responsive styling.
 
-- Fetch API for API calls
+- Fetch API: Handles communication with the backend API.
 
 ## Backend:
 
-- Node.js (JavaScript)
+- Node.js (JavaScript): Powers the backend logic and routing.
 
-- Express.js
+- Express.js: Simplifies API routing and request handling.
 
-- LLM APIs (GPT-4o-mini)
+- LLM APIs: GPT-4o-mini
 
-- dotenv for environment variables
+- dotenv: Manages environment variables, such as API keys.
 
-# File Structure
+# **File Structure**
 
 ## 3.1 Frontend
 
@@ -93,58 +98,88 @@ backend/
 
 │-- README.md
 
-# Development Journey
+# **Development Journey**
 
 ### 1. Initial Approach: Programmatic Preprocessing
 
-Tried splitting markdown using regex to detect headers, bullet lists, and
-paragraphs. Simply using the LLM to supplement the programmatic approach.
+- Problem: The initial attempt involved programmatically splitting markdown
+  using regex to identify headers (#, ##, ###), bullet points (-, \*), and
+  paragraph breaks (\n\n).
 
-Inefficient due to inconsistent markdown styles.
+- Challenge: Markdown documents often vary in structure and formatting. This
+  made it difficult to create a reliable, generalized regex-based solution for
+  all types of content.
+
+- Outcome: This approach was inefficient and prone to cutting off content
+  incorrectly.
 
 ### 2. LLM-Based Position Calculation
 
-Attempted splitting by character positions using LLMs.
+- Problem: Transitioned to leveraging LLMs for splitting documents by
+  calculating character positions in the text.
 
-Faced issues as LLMs are not optimized for numerical counting tasks.
+- Challenge: LLMs are not inherently designed for numerical and counting tasks,
+  which led to inaccurate or incomplete splits.
+
+- Example Issue: The LLM would fail to count accurately for large documents,
+  resulting in sections being cut off or skipped.
+
+- Outcome: This approach was abandoned because it was inconsistent and prone to
+  errors.
 
 ### 3. Final Solution: Direct Text Extraction
 
-Switched to returning slide content directly from the backend.
+- Problem Solved: Instead of relying on positions, the backend was updated to
+  process text and return discrete slide sections as plain text.
 
-Ensured all content is included without losing structure.
+- Approach:
+
+  - The backend sends batches of the document to the LLM and asks it to return
+    sections of text for each chunk.
+
+  - Overlap handling was added to ensure no content was missed between chunks.
+
+  - The frontend directly renders these sections as individual slides.
+
+- Outcome: This approach was reliable, scalable, and ensured the integrity of
+  the original document.
 
 ---
 
-# Key Features
+# **Key Features**
 
 ## **Clean and User-Friendly UI**
 
-- Markdown preview feature.
+- Real-time markdown preview for better user experience.
 
-- Input validation with real-time feedback.
+- Input validation ensures the user enters valid markdown and slide count.
 
-- Responsive design.
+- Responsive design with support for all device sizes.
 
 ## **Robust Backend Processing**
 
-- Batching large documents with overlap handling.
+- Handles large documents by splitting them into manageable batches with
+  overlapping content to avoid missed sections.
 
-- Supports multiple LLMs for flexibility.
+- Currently supports (GPT-4OMini), and can be modified to support more.
+
+- Designed with clear API endpoints for easy integration.
 
 ## **Error Handling & Validation**
 
-- Ensures slide count limits.
+- Validates inputs such as slide count (ensuring it's between 1 and 50).
 
-- Provides clear error messages for invalid input.
+- Ensures all content is processed and no text is left out.
 
-# Setup Instructions
+- Provides detailed error messages for invalid input or processing errors.
+
+# **Setup Instructions**
 
 ## **1. Prerequisites**
 
 - Install Node.js (v16+)
 
-- A valid API key for OpenAI, Anthropic, or Google
+- A valid API key for OpenAI
 
 ## **2. Installation Steps**
 
@@ -182,22 +217,23 @@ Ensured all content is included without losing structure.
 
 ## **LLM Counting Limitation**
 
-- Issue: LLMs were unreliable for exact character position splits.
+- Issue: LLMs were unreliable for splitting by exact character positions.
 
-- Solution: Switched to returning text directly rather than positions.
+- Solution: Switched to asking LLMs to return discrete text sections directly.
 
 ## **Performance Bottlenecks**
 
 - Issue: Large markdown files caused latency and API rate limits.
 
-- Solution: Implemented batching with overlapping content.
+- Solution: Batching with overlapping content ensured reliable processing while
+  avoiding rate limits.
 
 ## **Maintaining Markdown Integrity**
 
 - Issue: Some sections were cut off in the initial versions between words.
 
-- Solution: Improved prompt engineering to retain all content. Added JSON schema
-  validation to enforce structured output.
+- Solution: Improved prompt engineering and validated JSON outputs for structure
+  and content completeness.
 
 # **Future Improvements**
 
@@ -211,7 +247,7 @@ Ensured all content is included without losing structure.
 
 - Dynamically adjust batch sizes based on content complexity.
 
-Implement caching to reduce redundant LLM calls.
+- Implement caching to reduce redundant LLM calls.
 
 ## **Multi-LLM Support**
 
@@ -219,6 +255,8 @@ Implement caching to reduce redundant LLM calls.
 
 # **Conclusion**
 
-- This project showcases an efficient markdown-to-slide converter leveraging LLM
-  capabilities. The iterative development approach allowed for refining the
-  process to achieve a reliable and scalable solution.
+- This project demonstrates an efficient and user-friendly markdown-to-slide
+  converter leveraging LLM capabilities. Through iterative development and
+  continuous problem-solving, it now offers a reliable and scalable solution
+  that ensures all input content is included while maintaining structure and
+  usability.
