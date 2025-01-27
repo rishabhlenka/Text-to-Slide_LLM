@@ -27,6 +27,7 @@ const fetchLLMResponse = async (document, slideCount, model) => {
 - Retain markdown elements such as headers (e.g., #, ##), bullet points (-, *), and numbered lists (1., 2.).
 - Return the result as a plain JSON array with no formatting, code blocks, or additional text.
 - Do NOT include markdown formatting like \`**\`, \`*\`, \`###\` in the output.
+- Add line breaks, spaces, and bullet points where needed in the output.
 - Do NOT summarize, truncate, or modify content. 
 
 Here is the document:
@@ -40,14 +41,6 @@ Please provide the output as a clean JSON array of plain text sections.`;
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 2000,
-    },
-    "claude-3-haiku": {
-      model: "claude-3-haiku",
-      prompt,
-      max_tokens: 2000,
-    },
-    "gemini-1.5-flash": {
-      contents: [{ parts: [{ text: prompt }] }],
     },
   };
 
@@ -68,24 +61,21 @@ Please provide the output as a clean JSON array of plain text sections.`;
   let responseText;
   if (model === "gpt-4o-mini") {
     responseText = data.choices[0].message.content;
-  } else if (model === "claude-3-haiku") {
-    responseText = data.content;
-  } else {
-    responseText = data.candidates[0].content.parts[0].text;
   }
 
   console.log("Raw Content Before Parsing:", responseText);
 
   responseText = responseText
-    .replace(/```json/g, "") // Remove markdown code block
+    .replace(/```json/g, "") // Remove markdown code block for JSON
     .replace(/```/g, "") // Remove closing code block
-    .replace(/\\n/g, "\n") // Convert escaped newlines
+    .replace(/\\n/g, "\n") // Convert escaped newlines to actual newlines
+    .replace(/\r\n|\r/g, "\n") // Normalize line breaks
     .replace(/\s+\n/g, "\n") // Remove leading spaces before newlines
     .replace(/\n\s+/g, "\n") // Remove trailing spaces after newlines
     .replace(/\n{2,}/g, "\n\n") // Ensure consistent paragraph breaks
-    .replace(/"\s*,\s*"/g, '","') // Fix JSON array spacing issues
-    .replace(/,\s*]/g, "]") // Remove trailing commas in arrays
+    .replace(/- /g, "\n- ") // Ensure bullet points are preserved with line breaks
     .replace(/\s{2,}/g, " ") // Collapse multiple spaces into one
+    .replace(/[^\x20-\x7E]/g, "") // Remove non-printable characters
     .trim();
 
   let parsedData;

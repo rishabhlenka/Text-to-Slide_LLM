@@ -1,31 +1,37 @@
 const MAX_TOKENS_PER_CALL = 1500;
 
 const splitTextIntoChunks = (text, slideCount) => {
-  // Split text based on markdown headings or paragraphs
-  let sections = text.split(/(?=\n#{1,6}\s)|\n\s*\n/);
+  // Normalize newlines and split based on headings or paragraphs
+  let sections = text.split(/\n\s*\n|(?=\n#{1,6}\s)/);
 
   console.log("Initial Pre-Split Sections:", sections);
 
+  sections = sections.map((section) => section.trim()).filter(Boolean);
+
   if (sections.length > slideCount) {
-    // Merge sections to fit slide count
-    const mergeFactor = Math.ceil(sections.length / slideCount);
     const mergedSections = [];
+    const mergeFactor = Math.ceil(sections.length / slideCount);
+
     for (let i = 0; i < sections.length; i += mergeFactor) {
       mergedSections.push(sections.slice(i, i + mergeFactor).join("\n\n"));
     }
+
     sections = mergedSections.slice(0, slideCount);
-  } else if (sections.length < slideCount) {
-    // Add empty sections to match target count
-    while (sections.length < slideCount) {
+  }
+
+  if (sections.length < slideCount) {
+    const emptyCount = slideCount - sections.length;
+    for (let i = 0; i < emptyCount; i++) {
       sections.push("");
     }
   }
 
+  console.log("Adjusted Sections:", sections);
   return sections;
 };
 
 const splitForBatchProcessing = (text) => {
-  const sections = text.split(/(?=\n#{1,6}\s)/);
+  const sections = text.split(/\n(?=#+\s)|\n\s*\n/);
   const chunks = [];
   let currentChunk = "";
 
@@ -38,7 +44,7 @@ const splitForBatchProcessing = (text) => {
     }
   }
 
-  if (currentChunk) {
+  if (currentChunk.trim()) {
     chunks.push(currentChunk.trim());
   }
 

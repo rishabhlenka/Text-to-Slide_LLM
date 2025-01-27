@@ -3,6 +3,7 @@ import MarkdownInput from "../components/MarkdownInput";
 import SlideCountInput from "../components/SlideCountInput";
 import SubmitButton from "../components/SubmitButton";
 import SlideCard from "../components/SlideCard";
+import MarkdownPreview from "../components/MarkdownPreview";
 import { splitDocument } from "../api/SplitDocument";
 
 const HomePage = () => {
@@ -35,6 +36,7 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+
   return (
     <div className="container">
       <h1>Markdown to Slides</h1>
@@ -45,15 +47,25 @@ const HomePage = () => {
         <SubmitButton onSubmit={handleSubmit} />
       </div>
 
-      {loading && <p>Processing...</p>}
+      {markdown.trim() && (
+        <div className="side-by-side">
+          <div className="markdown-preview">
+            <h2>Markdown Preview</h2>
+            <MarkdownPreview markdown={markdown} />
+          </div>
 
-      {result.length > 0 && (
-        <div className="results">
-          <h2>Generated Slides:</h2>
-          <div className="slides-container">
-            {result.map((slide, index) => (
-              <SlideCard key={index} slide={slide} index={index} />
-            ))}
+          <div className="slide-preview">
+            <h2>Generated Slides</h2>
+            {loading && <p>Processing...</p>}
+            {result.length > 0 ? (
+              <div className="slides-container">
+                {result.map((slide, index) => (
+                  <SlideCard key={index} slide={slide} index={index} />
+                ))}
+              </div>
+            ) : (
+              <p>No slides generated yet</p>
+            )}
           </div>
         </div>
       )}
