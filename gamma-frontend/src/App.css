@@ -93,6 +93,21 @@ button:hover {
   list-style-type: disc;
 }
 
+/* Submit Button */
+.submit-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submit-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 /* Side-by-side layout */
 .side-by-side {
   display: flex;

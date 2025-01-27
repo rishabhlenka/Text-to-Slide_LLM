@@ -1,47 +1,81 @@
 import { config } from "dotenv";
-import {
-  splitTextIntoChunks,
-  splitForBatchProcessing,
-} from "../utils/textSplitter.js";
 config();
 
 const LLM_ENDPOINTS = {
   "gpt-4o-mini": "https://api.openai.com/v1/chat/completions",
-  "claude-3-haiku": "https://api.anthropic.com/v1/messages",
-  "gemini-1.5-flash":
-    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
 };
 
 const API_KEYS = {
   "gpt-4o-mini": process.env.OPENAI_API_KEY,
-  "claude-3-haiku": process.env.ANTHROPIC_API_KEY,
-  "gemini-1.5-flash": process.env.GEMINI_API_KEY,
 };
 
-// Function to process LLM call
-const fetchLLMResponse = async (document, slideCount, model) => {
+const splitDocumentForBatchingWithOverlap = (
+  document,
+  chunkSize,
+  overlapSize
+) => {
+  const regex = /(?=\n##? |(?<=\n)\s*[-*]\s|\n\n)/g;
+  const sections = document.split(regex);
+
+  let batches = [];
+  let currentBatch = "";
+
+  sections.forEach((section) => {
+    if ((currentBatch + section).length > chunkSize) {
+      batches.push(currentBatch.trim());
+      currentBatch = section.slice(-overlapSize); // Ensure overlap
+    } else {
+      currentBatch += section;
+    }
+  });
+
+  if (currentBatch) batches.push(currentBatch.trim());
+  return batches;
+};
+
+const fetchLLMSplitSlides = async (document, slideCount, model) => {
   const prompt = `You are given a markdown document.
 
-- Split the document into exactly ${slideCount} sections.
-- Ensure each section contains meaningful content while preserving the original document structure.
-- Retain markdown elements such as headers (e.g., #, ##), bullet points (-, *), and numbered lists (1., 2.).
-- Return the result as a plain JSON array with no formatting, code blocks, or additional text.
-- Do NOT include markdown formatting like \`**\`, \`*\`, \`###\` in the output.
-- Add line breaks, spaces, and bullet points where needed in the output.
-- Do NOT summarize, truncate, or modify content. 
+- Divide the given document into exactly ${slideCount} sections in a meaningful way.
+- Prioritize split points at logical breaks such as:
+  - At the beginning of major sections or sub-sections marked by headers (e.g., #, ##, ###)
+  - Before significant bullet points (e.g., - or *)
+  - At natural paragraph breaks (double line breaks \\n\\n)
+  - At the end of sentences (periods followed by a newline).
+- **Ensure all content is included and nothing is omitted, even if slides exceed the requested count.**
 
-Here is the document:
+---
+
+**Now analyze the following markdown document and provide the slides for only this section of text:**
 
 ${document}
 
-Please provide the output as a clean JSON array of plain text sections.`;
+--- DO NOT INCLUDE BELOW TEXT ---
+
+### Important Output Format:
+You MUST respond with a valid JSON object that contains:
+
+\`\`\`json
+{
+  "slides": ["string", "string", "string", "..."]
+}
+\`\`\`
+
+Do NOT include explanations, headers, or any additional text before or after the JSON output.
+`;
 
   const payload = {
-    "gpt-4o-mini": {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2000,
-    },
+    model: model,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an assistant trained to analyze markdown documents and suggest optimal slides strictly following the given format.",
+      },
+      { role: "user", content: prompt },
+    ],
+    max_tokens: 3000,
+    response_format: { type: "json_object" },
   };
 
   const response = await fetch(LLM_ENDPOINTS[model], {
@@ -50,7 +84,7 @@ Please provide the output as a clean JSON array of plain text sections.`;
       Authorization: `Bearer ${API_KEYS[model]}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload[model]),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -58,72 +92,53 @@ Please provide the output as a clean JSON array of plain text sections.`;
   }
 
   const data = await response.json();
-  let responseText;
-  if (model === "gpt-4o-mini") {
-    responseText = data.choices[0].message.content;
-  }
+  const responseText = data.choices[0].message.content;
 
   console.log("Raw Content Before Parsing:", responseText);
 
-  responseText = responseText
-    .replace(/```json/g, "") // Remove markdown code block for JSON
-    .replace(/```/g, "") // Remove closing code block
-    .replace(/\\n/g, "\n") // Convert escaped newlines to actual newlines
-    .replace(/\r\n|\r/g, "\n") // Normalize line breaks
-    .replace(/\s+\n/g, "\n") // Remove leading spaces before newlines
-    .replace(/\n\s+/g, "\n") // Remove trailing spaces after newlines
-    .replace(/\n{2,}/g, "\n\n") // Ensure consistent paragraph breaks
-    .replace(/- /g, "\n- ") // Ensure bullet points are preserved with line breaks
-    .replace(/\s{2,}/g, " ") // Collapse multiple spaces into one
-    .replace(/[^\x20-\x7E]/g, "") // Remove non-printable characters
-    .trim();
-
   let parsedData;
   try {
-    parsedData = JSON.parse(responseText);
+    parsedData = JSON.parse(responseText.trim());
+
+    if (!Array.isArray(parsedData.slides)) {
+      throw new Error("Invalid JSON format received.");
+    }
+
+    return parsedData.slides;
   } catch (error) {
     console.error("JSON Parsing Error:", error, "Received Text:", responseText);
-    throw new Error(
-      "Invalid JSON response received. Please check LLM response."
-    );
+    throw new Error("Invalid JSON response received from LLM.");
   }
-  return parsedData;
 };
 
-// Main processing function with batch handling
 const processWithLLM = async (document, slideCount, model = "gpt-4o-mini") => {
   console.log("Processing document with LLM...");
 
-  const chunks = splitForBatchProcessing(document);
-  console.log(`Processing ${chunks.length} chunks separately...`);
+  const chunkSize = 3000; // Increase chunk size to capture more content
+  const chunks = splitDocumentForBatchingWithOverlap(document, chunkSize, 500); // Increase overlap
 
-  let allSections = [];
+  let allSlides = [];
 
   for (const chunk of chunks) {
-    console.log("Processing chunk:", chunk.substring(0, 100) + "...");
+    console.log(`Processing chunk of size: ${chunk.length}`);
     try {
-      const responseSections = await fetchLLMResponse(chunk, slideCount, model);
-      allSections = allSections.concat(responseSections);
+      const slides = await fetchLLMSplitSlides(chunk, slideCount, model);
+      allSlides.push(...slides);
     } catch (error) {
       console.error("Error processing chunk:", error);
-      throw error;
+      throw new Error("Failed to process document in batches.");
     }
   }
 
-  // Post-process and split into required slide count
-  let preSplitSections = splitTextIntoChunks(
-    allSections.join("\n\n"),
-    slideCount
-  );
+  console.log("Final Slides:", allSlides);
 
-  if (preSplitSections.length < slideCount) {
-    while (preSplitSections.length < slideCount) {
-      preSplitSections.push("");
-    }
+  // If missing slides, append remaining document
+  if (allSlides.join("\n").length < document.length) {
+    console.warn("Some content was missing; appending remaining text.");
+    allSlides.push(document.slice(allSlides.join("\n").length).trim());
   }
 
-  console.log("Final Sections Adjusted to Slide Count:", preSplitSections);
-  return preSplitSections;
+  return { slides: allSlides };
 };
 
 export { processWithLLM };
