@@ -1,3 +1,10 @@
+// SubmitButton Component
+// This component renders a button to trigger the document submission process.
+// It accepts three props:
+// - onSubmit: A function to be executed when the button is clicked.
+// - disabled: A boolean to disable the button when necessary.
+// - loading: A boolean to show a loading state during processing.
+
 interface SubmitButtonProps {
   onSubmit: () => void;
   disabled?: boolean;

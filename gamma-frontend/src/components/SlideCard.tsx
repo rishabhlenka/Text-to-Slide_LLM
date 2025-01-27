@@ -1,3 +1,7 @@
+// SlideCard Component
+// This component displays an individual slide with a numbered index and formatted markdown content.
+// It processes the slide text to clean up escape characters before rendering it using ReactMarkdown.
+
 import ReactMarkdown from "react-markdown";
 
 const SlideCard = ({ slide, index }: { slide: string; index: number }) => {

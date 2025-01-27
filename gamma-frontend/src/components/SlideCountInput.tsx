@@ -1,3 +1,7 @@
+// SlideCountInput Component
+// This component provides an input field for the user to specify the desired number of slides.
+// It accepts values between 1 and 50 and calls the onChange function with the selected value.
+
 const SlideCountInput = ({
   onChange,
 }: {

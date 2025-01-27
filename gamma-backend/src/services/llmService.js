@@ -1,19 +1,30 @@
 import { config } from "dotenv";
 config();
 
+// Define LLM API endpoints
 const LLM_ENDPOINTS = {
   "gpt-4o-mini": "https://api.openai.com/v1/chat/completions",
 };
 
+// Load keys from .env file
 const API_KEYS = {
   "gpt-4o-mini": process.env.OPENAI_API_KEY,
 };
 
+/**
+ * Splits a document into smaller chunks with overlap to maintain context between sections.
+ *
+ * @param {string} document - The input markdown document.
+ * @param {number} chunkSize - Maximum size of each chunk.
+ * @param {number} overlapSize - Overlapping characters to include at the beginning of the next chunk for continuity.
+ * @returns {string[]} An array of document chunks with overlap.
+ */
 const splitDocumentForBatchingWithOverlap = (
   document,
   chunkSize,
   overlapSize
 ) => {
+  // Regex to split at markdown boundaries like headers, bullet points, etc.
   const regex = /(?=\n##? |(?<=\n)\s*[-*]\s|\n\n)/g;
   const sections = document.split(regex);
 
@@ -22,8 +33,9 @@ const splitDocumentForBatchingWithOverlap = (
 
   sections.forEach((section) => {
     if ((currentBatch + section).length > chunkSize) {
+      // Store the current bath and add an overlap to maintain context for LLM
       batches.push(currentBatch.trim());
-      currentBatch = section.slice(-overlapSize); // Ensure overlap
+      currentBatch = section.slice(-overlapSize);
     } else {
       currentBatch += section;
     }
@@ -33,10 +45,18 @@ const splitDocumentForBatchingWithOverlap = (
   return batches;
 };
 
-const fetchLLMSplitSlides = async (document, slideCount, model) => {
+/**
+ * Calls the LLM API to split the document chunk into slide sections.
+ *
+ * @param {string} document - The document chunk to process.
+ * @param {number} slidesPerChunk - Number of slides to generate for this chunk.
+ * @param {string} model - The LLM model to use for processing.
+ * @returns {Promise<string[]>} A promise resolving to an array of slide sections.
+ */
+const fetchLLMSplitSlides = async (document, slidesPerChunk, model) => {
   const prompt = `You are given a markdown document.
 
-- Divide the given document into exactly ${slideCount} sections in a meaningful way.
+- Divide the given document into exactly ${slidesPerChunk} sections in a meaningful way.
 - Prioritize split points at logical breaks such as:
   - At the beginning of major sections or sub-sections marked by headers (e.g., #, ##, ###)
   - Before significant bullet points (e.g., - or *)
@@ -75,9 +95,10 @@ Do NOT include explanations, headers, or any additional text before or after the
       { role: "user", content: prompt },
     ],
     max_tokens: 3000,
-    response_format: { type: "json_object" },
+    response_format: { type: "json_object" }, // Force LLM to output JSON
   };
 
+  // Call the LLM, can be modified to be model agnostic
   const response = await fetch(LLM_ENDPOINTS[model], {
     method: "POST",
     headers: {
@@ -111,18 +132,29 @@ Do NOT include explanations, headers, or any additional text before or after the
   }
 };
 
+/**
+ * Processes the entire document by splitting it into chunks and using the LLM to generate slides.
+ *
+ * @param {string} document - The complete markdown document.
+ * @param {number} slideCount - The target number of slides to produce.
+ * @param {string} model - The LLM model to use (default is "gpt-4o-mini").
+ * @returns {Promise<{slides: string[]}>} A promise resolving to an object containing the slides.
+ */
 const processWithLLM = async (document, slideCount, model = "gpt-4o-mini") => {
-  console.log("Processing document with LLM...");
+  // console.log("Processing document with LLM...");
 
-  const chunkSize = 3000; // Increase chunk size to capture more content
-  const chunks = splitDocumentForBatchingWithOverlap(document, chunkSize, 500); // Increase overlap
+  const chunkSize = 3000; // Maximum chunk size to fit within LLM token limits
+  const chunks = splitDocumentForBatchingWithOverlap(document, chunkSize, 700);
+
+  // Determine the number of slides to request per chunk to distribute evenly
+  const slidesPerChunk = Math.max(1, Math.floor(slideCount / chunks.length));
 
   let allSlides = [];
 
   for (const chunk of chunks) {
-    console.log(`Processing chunk of size: ${chunk.length}`);
+    // console.log(`Processing chunk of size: ${chunk.length}`);
     try {
-      const slides = await fetchLLMSplitSlides(chunk, slideCount, model);
+      const slides = await fetchLLMSplitSlides(chunk, slidesPerChunk, model);
       allSlides.push(...slides);
     } catch (error) {
       console.error("Error processing chunk:", error);
@@ -130,14 +162,25 @@ const processWithLLM = async (document, slideCount, model = "gpt-4o-mini") => {
     }
   }
 
-  console.log("Final Slides:", allSlides);
+  // console.log("Final Slides:", allSlides);
 
-  // If missing slides, append remaining document
-  if (allSlides.join("\n").length < document.length) {
-    console.warn("Some content was missing; appending remaining text.");
-    allSlides.push(document.slice(allSlides.join("\n").length).trim());
+  // Trim the slides if we received more than requested
+  if (allSlides.length > slideCount) {
+    allSlides = allSlides.slice(0, slideCount);
   }
 
+  // If missing slides, append remaining document
+  const combinedSlidesText = allSlides.join("\n").trim();
+  if (combinedSlidesText.length < document.trim().length) {
+    const remainingText = document
+      .trim()
+      .substring(combinedSlidesText.length)
+      .trim();
+    if (remainingText.length > 0) {
+      console.warn("Appending remaining text that was not included in slides.");
+      allSlides.push(remainingText);
+    }
+  }
   return { slides: allSlides };
 };
 

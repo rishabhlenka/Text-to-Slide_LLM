@@ -1,3 +1,10 @@
+// MarkdownPreview Component
+// This component takes a markdown string as input and renders it as formatted content.
+// It displays the first line of the markdown in bold to serve as a title/header.
+// Subsequent lines are processed and displayed as either paragraphs or list items,
+// depending on whether they start with a bullet point (e.g., "- " or "* ").
+// Empty lines are rendered as line breaks to preserve spacing in the content.
+
 const MarkdownPreview = ({ markdown }: { markdown: string }) => {
   return (
     <div className="slide-card">

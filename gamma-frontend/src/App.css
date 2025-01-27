@@ -1,4 +1,4 @@
-/* General container styling */
+/* General Styles */
 .container {
   max-width: 95%;
   margin: 4rem auto;
@@ -9,7 +9,7 @@
   color: #f5f5f5;
 }
 
-/* Heading styles */
+/* Heading Styles */
 h1 {
   font-size: 3rem;
   font-weight: bold;
@@ -18,7 +18,7 @@ h1 {
   color: #ffffff;
 }
 
-/* Form layout */
+/* Form Layout */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -27,7 +27,7 @@ h1 {
   width: 100%;
 }
 
-/* Button styling */
+/* Button Styles */
 button {
   width: 100%;
   max-width: 400px;
@@ -46,53 +46,6 @@ button:hover {
   background: linear-gradient(90deg, #0056b3, #003c7a);
 }
 
-/* Slides container */
-.slides-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-/* Slide card styling */
-.slide-card {
-  display: flex;
-  gap: 1rem;
-  padding: 2rem;
-  background: #242424;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  color: #ddd;
-  max-width: 100%;
-}
-
-.slide-number {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #00aaff;
-  background: #003c7a;
-  padding: 1rem 1.5rem;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.slide-content p {
-  font-size: 1rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.slide-content li {
-  margin-left: 1.5rem;
-  list-style-type: disc;
-}
-
 /* Submit Button */
 .submit-button {
   background-color: #007bff;
@@ -108,7 +61,7 @@ button:hover {
   cursor: not-allowed;
 }
 
-/* Side-by-side layout */
+/* Side-by-Side Layout */
 .side-by-side {
   display: flex;
   gap: 3rem;
@@ -117,7 +70,7 @@ button:hover {
   width: 100%;
 }
 
-/* Markdown input section */
+/* Markdown Input Section */
 .markdown-preview,
 .slide-preview {
   flex: 1;
@@ -130,7 +83,7 @@ button:hover {
 
 .markdown-input textarea {
   width: 100%;
-  height: 150px; /* Small size for input */
+  height: 150px;
   background: #333;
   color: #fff;
   border: 1px solid #555;
@@ -141,7 +94,7 @@ button:hover {
   box-sizing: border-box;
 }
 
-/* Markdown input styles */
+/* Markdown Input Textarea */
 textarea {
   width: 100%;
   height: 100%;
@@ -156,7 +109,7 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Slide preview section */
+/* Slide Preview Titles */
 .slide-preview h2,
 .markdown-input h2 {
   font-size: 1.8rem;
@@ -165,7 +118,56 @@ textarea {
   margin-bottom: 1.5rem;
 }
 
-/* Responsive adjustments */
+/* Slides Container */
+.slides-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Slide Card Styling */
+.slide-card {
+  display: flex;
+  gap: 1rem;
+  padding: 2rem;
+  background: #242424;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  color: #ddd;
+  max-width: 100%;
+}
+
+/* Slide Number */
+.slide-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #00aaff;
+  background: #003c7a;
+  padding: 1rem 1.5rem;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Slide Content */
+.slide-content p {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.slide-content li {
+  margin-left: 1.5rem;
+  list-style-type: disc;
+}
+
+/* Responsive Adjustments for Tablets */
 @media (max-width: 1200px) {
   .side-by-side {
     flex-direction: column;
@@ -177,7 +179,7 @@ textarea {
   }
 }
 
-/* Responsive design */
+/* Responsive Adjustments for Mobile */
 @media (max-width: 768px) {
   .container {
     padding: 2rem;

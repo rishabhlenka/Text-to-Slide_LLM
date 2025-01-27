@@ -1,3 +1,8 @@
+// MarkdownInput Component
+// This component provides a textarea input for users to enter markdown content.
+// It maintains local state for the input value and notifies the parent component
+// whenever the input changes through the provided `onChange` callback.
+
 import { useState } from "react";
 
 const MarkdownInput = ({ onChange }: { onChange: (value: string) => void }) => {
