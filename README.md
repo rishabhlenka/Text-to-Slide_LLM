@@ -1,4 +1,4 @@
-1. Project Overview
+# Project Overview
 
 - The project consists of a React frontend and a Node.js backend that leverages
   LLMs to split markdown documents.
@@ -7,9 +7,9 @@
 
 - The backend processes the content and returns structured slide sections.
 
-2. Tech Stack
+# Tech Stack
 
-- Frontend:
+## Frontend:
 
 - React (TypeScript)
 
@@ -17,7 +17,7 @@
 
 - Fetch API for API calls
 
-- Backend:
+## Backend:
 
 - Node.js (JavaScript)
 
@@ -27,9 +27,9 @@
 
 - dotenv for environment variables
 
-3. File Structure
+# File Structure
 
-- 3.1 Frontend
+## 3.1 Frontend
 
 frontend/
 
@@ -67,7 +67,7 @@ frontend/
 
 │-- README.md
 
-- 3.2 Backend
+## 3.2 Backend
 
 backend/
 
@@ -93,130 +93,132 @@ backend/
 
 │-- README.md
 
-4. Development Journey
+# Development Journey
 
-   1. Initial Approach: Programmatic Preprocessing
+### 1. Initial Approach: Programmatic Preprocessing
 
-   Tried splitting markdown using regex to detect headers, bullet lists, and
-   paragraphs. Simply using the LLM to supplement the programmatic approach.
+Tried splitting markdown using regex to detect headers, bullet lists, and
+paragraphs. Simply using the LLM to supplement the programmatic approach.
 
-   Inefficient due to inconsistent markdown styles.
+Inefficient due to inconsistent markdown styles.
 
-   2. LLM-Based Position Calculation
+### 2. LLM-Based Position Calculation
 
-   Attempted splitting by character positions using LLMs.
+Attempted splitting by character positions using LLMs.
 
-   Faced issues as LLMs are not optimized for numerical counting tasks.
+Faced issues as LLMs are not optimized for numerical counting tasks.
 
-   3. Final Solution: Direct Text Extraction
+### 3. Final Solution: Direct Text Extraction
 
-   Switched to returning slide content directly from the backend.
+Switched to returning slide content directly from the backend.
 
-   Ensured all content is included without losing structure.
+Ensured all content is included without losing structure.
 
-5. Key Features
+---
 
-   Clean and User-Friendly UI
+# Key Features
 
-   Markdown preview feature.
+## **Clean and User-Friendly UI**
 
-   Input validation with real-time feedback.
+- Markdown preview feature.
 
-   Responsive design.
+- Input validation with real-time feedback.
 
-   Robust Backend Processing
+- Responsive design.
 
-   Batching large documents with overlap handling.
+## **Robust Backend Processing**
 
-   Supports multiple LLMs for flexibility.
+- Batching large documents with overlap handling.
 
-   Error Handling & Validation
+- Supports multiple LLMs for flexibility.
 
-   Ensures slide count limits.
+\*\* **Error Handling & Validation**
 
-   Provides clear error messages for invalid input.
+- Ensures slide count limits.
 
-6. Setup Instructions
+- Provides clear error messages for invalid input.
 
-   1. Prerequisites
+# Setup Instructions
 
-   Install Node.js (v16+)
+## **1. Prerequisites**
 
-   A valid API key for OpenAI, Anthropic, or Google
+- Install Node.js (v16+)
 
-   2. Installation Steps
+- A valid API key for OpenAI, Anthropic, or Google
 
-   - Clone the repository:
+## **2. Installation Steps**
 
-     'git clone https://github.com/rishabhlenka/gamma.git'
+1. Clone the repository:
 
-     'cd gamma'
+   'git clone https://github.com/rishabhlenka/gamma.git'
 
-   - Backend Setup:
+   'cd gamma'
 
-     'cd gamma-backend'
+2. Backend Setup:
 
-     'npm install'
+   'cd gamma-backend'
 
-   - Create a .env file:
+   'npm install'
 
-     'OPENAI_API_KEY=your_api_key_here'
+3. Create a .env file:
 
-   - Start the backend:
+   'OPENAI_API_KEY=your_api_key_here'
 
-     'node index.js'
+4. Start the backend:
 
-   - Frontend Setup:
+   'node index.js'
 
-     'cd frontend'
+5. Frontend Setup:
 
-     'npm install'
+   'cd frontend'
 
-     'npm run dev'
+   'npm install'
 
-   - Open the app in the browser at http://localhost:3000
+   'npm run dev'
 
-7. Challenges Faced & Solutions
+6. Open the app in the browser at http://localhost:3000
 
-- LLM Counting Limitations
+# **Challenges Faced & Solutions**
 
-Issue: LLMs were unreliable for exact character position splits.
+## _LLM Counting Limitations_
 
-Solution: Switched to returning text directly rather than positions.
+- Issue: LLMs were unreliable for exact character position splits.
 
-- Performance Bottlenecks
+- Solution: Switched to returning text directly rather than positions.
 
-Issue: Large markdown files caused latency and API rate limits.
+## **Performance Bottlenecks**
 
-Solution: Implemented batching with overlapping content.
+- Issue: Large markdown files caused latency and API rate limits.
 
-- Maintaining Markdown Integrity
+- Solution: Implemented batching with overlapping content.
 
-  Issue: Some sections were cut off in the initial versions between words.
+## **Maintaining Markdown Integrity**
 
-  Solution: Improved prompt engineering to retain all content. Added JSON schema
+- Issue: Some sections were cut off in the initial versions between words.
+
+- Solution: Improved prompt engineering to retain all content. Added JSON schema
   validation to enforce structured output.
 
-8. Future Improvements
+# **Future Improvements**
 
-   Enhanced UI/UX
+## **Enhanced UI/UX**
 
-   Add slide reordering via drag-and-drop.
+- Add slide reordering via drag-and-drop.
 
-   Live markdown editing within the app.
+- Live markdown editing within the app.
 
-   Performance Enhancements
+## **Performance Enhancements**
 
-   Dynamically adjust batch sizes based on content complexity.
+- Dynamically adjust batch sizes based on content complexity.
 
-   Implement caching to reduce redundant LLM calls.
+Implement caching to reduce redundant LLM calls.
 
-   Multi-LLM Support
+## **Multi-LLM Support**
 
-   Add dynamic selection between available LLMs based on performance.
+- Add dynamic selection between available LLMs based on performance.
 
-9. Conclusion
+# Conclusion
 
-   This project showcases an efficient markdown-to-slide converter leveraging
-   LLM capabilities. The iterative development approach allowed for refining the
-   process to achieve a reliable and scalable solution.
+- This project showcases an efficient markdown-to-slide converter leveraging LLM
+  capabilities. The iterative development approach allowed for refining the
+  process to achieve a reliable and scalable solution.
